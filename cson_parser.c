@@ -140,7 +140,7 @@ array *tokenize(char *json) {
     } else if (c >= '0' && c <= '9' || c == 't' || c == 'f' || c == 'n') {
       int diff;
       char start = c >= '0' && c <= '9' ? '0' : 'a', end = c >= '0' && c <= '9' ? '9' : 'z';
-      for (diff = 0; diff < length && json[i + diff] >= start && json[i + diff] <= end; diff++);
+      for (diff = 0; diff < length && (json[i + diff] >= start && json[i + diff] <= end || (start == '0' && json[i + diff] == '.')); diff++);
       tmp = malloc(sizeof(char) * (diff + 2));
       memcpy(tmp, json + i, diff);
       *(tmp + diff) = '\0';
@@ -176,7 +176,11 @@ cson_object_t *literal_switch(array *tokens, int *index) {
     case '7':
     case '8':
     case '9':
-      return parse_int(token);
+      if (strchr(token, '.')) {
+        return parse_double(token);
+      } else {
+        return parse_int(token);
+      }
     case 't':
     case 'f':
       return parse_bool(token);
@@ -255,7 +259,7 @@ cson_object_t *parse_bool(char *boolean) {
 
 cson_object_t *parse_double(char *decimal) {
   double value;
-  sscanf(decimal, "%F", &value);
+  sscanf(decimal, "%lf", &value);
   cson_object_t *new_obj = create_cson_double(value);
   return new_obj;
 }

@@ -31,6 +31,12 @@ int main(void) {
       } else {
         puts("Wrong");
       }
+
+      cson_object_t *friend_count = cson_get_key(actor, "friendsCount");
+      if (cson_is_double(friend_count)) {
+        double count = *cson_get_double(friend_count);
+        printf("%lf\n", count);
+      }
     } else {
       puts("Wrong");
     }
