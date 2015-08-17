@@ -15,16 +15,13 @@ int main(void) {
     }
     cson_object_t *actor = get(hsh, "actor");
     if (cson_is_hash(actor)) {
-      hash *actor_hash = actor->data;
-      cson_object_t *links = get(actor_hash, "links");
+      cson_object_t *links = cson_get_key(actor, "links");
       if (cson_is_array(links)) {
-        array *links_arr = links->data;
-        cson_object_t *elem = retrieve(links_arr, 0);
+        cson_object_t *elem = cson_get_element(links, 0);
         if (cson_is_hash(elem)) {
-          hash *elem_hash = elem->data;
-          cson_object_t *rel = get(elem_hash, "rel");
+          cson_object_t *rel = cson_get_key(elem, "rel");
           if (cson_is_string(rel)) {
-            char *rel_str = rel->data;
+            char *rel_str = cson_get_string(rel);
             puts(rel_str);
           } else {
             puts("Wrong");
