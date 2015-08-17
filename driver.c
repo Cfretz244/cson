@@ -5,15 +5,14 @@
 int main(void) {
   cson_object_t *json = cson_parse_filename("test.json");
   if (cson_is_hash(json)) {
-    hash *hsh = json->data;
-    cson_object_t *id = get(hsh, "id");
+    cson_object_t *id = cson_get_key(json, "id");
     if (cson_is_string(id)) {
-      char *id_str = id->data;
+      char *id_str = cson_get_string(id);
       puts(id_str);
     } else {
       puts("Wrong");
     }
-    cson_object_t *actor = get(hsh, "actor");
+    cson_object_t *actor = cson_get_key(json, "actor");
     if (cson_is_hash(actor)) {
       cson_object_t *links = cson_get_key(actor, "links");
       if (cson_is_array(links)) {
