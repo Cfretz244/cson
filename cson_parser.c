@@ -31,7 +31,7 @@ cson_object_t *cson_parse_file(FILE *json_file) {
   char *json = malloc(sizeof(char) * size);
   if (json) {
     for (int i = 0; true; i++) {
-      char c = getchar();
+      char c = getc(json_file);
       if (c == EOF) {
         json[i] = '\0';
         break;
@@ -41,7 +41,7 @@ cson_object_t *cson_parse_file(FILE *json_file) {
         size *= 2;
         char *resized = realloc(json, size);
         if (!resized) return NULL;
-        free(json);
+        if (json != resized) free(json);
         json = resized;
       }
     }
@@ -80,13 +80,15 @@ array *tokenize(char *json) {
       *tmp = c;
       *(tmp + 1) = '\0';
       push(tokens, tmp);
+      i++;
 
       int diff;
-      for (diff = 1; i + diff < length && json[i + diff] != '"'; diff++);
-      if (diff > 1) {
-        tmp = malloc(sizeof(char) * diff);
-        memcpy(tmp, json + i, diff - 1);
-        *(tmp + diff) = '\0';
+      char prev = '\0';
+      for (diff = 0; i + diff < length && (json[i + diff] != '"' || prev == '\\'); diff++) prev = json[i + diff];
+      if (diff) {
+        tmp = malloc(sizeof(char) * (diff + 1));
+        memcpy(tmp, json + i, diff);
+        *(tmp + diff + 1) = '\0';
         push(tokens, tmp);
       }
 
@@ -108,4 +110,6 @@ array *tokenize(char *json) {
       push(tokens, tmp);
     }
   }
+
+  return tokens;
 }
