@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-/*----- Includes without dependencies -----*/
+/*----- Local Includes -----*/
 
 #include "definitions.h"
 
@@ -21,6 +21,7 @@ typedef struct array {
 
 array *create_array();
 bool insert(array *arr, int index, void *data);
+bool push(array *arr, void *data);
 void *retrieve(array *arr, int index);
 void *clear(array *arr, int index);
 void destroy_array(array *arr, void (*destruct) (void *));

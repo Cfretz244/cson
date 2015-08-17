@@ -50,6 +50,10 @@ bool insert(array *arr, int index, void *data) {
     }
 }
 
+bool push(array *arr, void *data) {
+  return insert(arr, arr->count, data);
+}
+
 // Function is responsible for getting the data at a specific index. Invalid
 // indexes return NULL.
 void *retrieve(array *arr, int index) {

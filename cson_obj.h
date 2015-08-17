@@ -1,6 +1,10 @@
 #ifndef CSON_OBJ
 #define CSON_OBJ
 
+/*----- Local Includes -----*/
+
+#include "definitions.h"
+
 /*----- Bitmasks -----*/
 
 #define CSON_IS_INTEGER 0x01

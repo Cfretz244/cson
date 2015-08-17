@@ -1,7 +1,7 @@
 #ifndef HASH
 #define HASH
 
-/*----- Includes without dependencies -----*/
+/*----- Local Includes -----*/
 
 #include "definitions.h"
 
