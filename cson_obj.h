@@ -4,6 +4,8 @@
 /*----- Local Includes -----*/
 
 #include "definitions.h"
+#include "array.h"
+#include "hash.h"
 
 /*----- Bitmasks -----*/
 
@@ -20,6 +22,15 @@ typedef struct {
   unsigned char type;
   void *data;
 } cson_object_t;
+
+/*----- Value Creation Functions -----*/
+
+cson_object_t *create_cson_int(int value);
+cson_object_t *create_cson_double(double value);
+cson_object_t *create_cson_bool(bool value);
+cson_object_t *create_cson_string(char *value);
+cson_object_t *create_cson_array(array *value);
+cson_object_t *create_cson_hash(hash *value);
 
 /*----- Intermediate Retrieval Functions -----*/
 

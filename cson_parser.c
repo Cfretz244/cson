@@ -1,64 +1,53 @@
+/*----- System Includes -----*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
+
+/*----- Local Includes -----*/
+
 #include "definitions.h"
 #include "array.h"
+#include "hash.h"
 #include "cson_parser.h"
+
+/*----- Macro Function Declarations -----*/
+
+#define ADVANCE() token = retrieve(tokens, (*index)++)
+
+#define HASH_ENFORCE_TOKEN(target) \
+  if (*token != target) { \
+    destroy_hash(data); \
+    return NULL; \
+  }
+
+#define ARRAY_ENFORCE_TOKEN(target) \
+  if (*token != target) { \
+    destroy_array(data, free); \
+    return NULL; \
+  }
+
 
 /*----- Internal Parsing Function Stub Declarations -----*/
 
 array *tokenize(char *json);
+cson_object_t *literal_switch(array *tokens, int *index);
 
-cson_object_t *parse_object(char *json);
-cson_object_t *parse_array(char *json);
-cson_object_t *parse_string(char *json);
-cson_object_t *parse_bool(char *json);
-cson_object_t *parse_double(char *json);
-cson_object_t *parse_int(char *json);
+cson_object_t *parse_hash(array *tokens, int *index);
+cson_object_t *parse_array(array *tokens, int *index);
+cson_object_t *parse_string(array *tokens, int *index);
+cson_object_t *parse_bool(array *tokens, int *index);
+cson_object_t *parse_double(array *tokens, int *index);
+cson_object_t *parse_int(array *tokens, int *index);
 
 /*----- Public Parsing Function Implementations -----*/
 
 cson_object_t *cson_parse_string(char *json) {
   array *tokens = tokenize(json);
-
-  for (int i = 0; i < tokens->count; i++) {
-    char *token = retrieve(tokens, i);
-    puts(token);
-
-    switch (*token) {
-      case '{':
-        break;
-
-      case '[':
-        break;
-
-      case '"':
-        break;
-
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-      case 8:
-      case 9:
-        break;
-
-      case 't':
-      case 'f':
-        break;
-
-      case 'n':
-        break;
-      default:
-        break;
-    }
-  }
+  int index = 0;
+  cson_object_t *parsed = literal_switch(tokens, &index);
 
   return NULL;
 }
@@ -103,6 +92,8 @@ cson_object_t *cson_parse_filename(char *filename) {
     return NULL;
   }
 }
+
+/*----- Internal Parsing Function Implementations -----*/
 
 array *tokenize(char *json) {
   array *tokens = create_array();
@@ -158,4 +149,97 @@ array *tokenize(char *json) {
   }
 
   return tokens;
+}
+
+cson_object_t *literal_switch(array *tokens, int *index) {
+  char *token = retrieve(tokens, (*index)++);
+  switch (*token) {
+    case '{':
+      return parse_hash(tokens, index);
+    case '[':
+      return parse_array(tokens, index);
+    case '"':
+      return parse_string(tokens, index);
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+      return parse_int(tokens, index);
+    case 't':
+    case 'f':
+      return parse_bool(tokens, index);
+    case 'n':
+      return parse_hash(tokens, index);
+    default:
+      return NULL;
+  }
+}
+
+
+cson_object_t *parse_hash(array *tokens, int *index) {
+  hash *data = create_hash(free);
+  cson_object_t *new_obj = create_cson_hash(data);
+
+  for (char *token = retrieve(tokens, (*index)++); *token != '}'; token = retrieve(tokens, (*index)++)) {
+    HASH_ENFORCE_TOKEN('"');
+    ADVANCE();
+
+    char *key = token;
+    ADVANCE();
+
+    HASH_ENFORCE_TOKEN('"');
+    ADVANCE();
+    HASH_ENFORCE_TOKEN(':');
+    ADVANCE();
+
+    put(data, key, literal_switch(tokens, index));
+    HASH_ENFORCE_TOKEN(',');
+  }
+
+  return new_obj;
+}
+
+cson_object_t *parse_array(array *tokens, int *index) {
+  array *data = create_array();
+  cson_object_t *new_obj = create_cson_array(data);
+
+  for (char *token = retrieve(tokens, (*index)++); *token != ']'; token = retrieve(tokens, (*index)++)) {
+    push(data, literal_switch(tokens, index));
+    ARRAY_ENFORCE_TOKEN(',');
+  }
+
+  return new_obj;
+}
+
+cson_object_t *parse_string(array *tokens, int *index) {
+  char *str = retrieve(tokens, (*index)++);
+  char *copy = malloc(sizeof(char) * (strlen(str) + 1));
+  strcpy(copy, str);
+
+  cson_object_t *new_obj = create_cson_string(copy);
+  return new_obj;
+}
+
+cson_object_t *parse_bool(array *tokens, int *index) {
+  bool *boolean = retrieve(tokens, (*index)++);
+  cson_object_t *new_obj = create_cson_bool(*boolean);
+  return new_obj;
+}
+
+cson_object_t *parse_double(array *tokens, int *index) {
+  double *decimal = retrieve(tokens, (*index)++);
+  cson_object_t *new_obj = create_cson_double(*decimal);
+  return new_obj;
+}
+
+cson_object_t *parse_int(array *tokens, int *index) {
+  int *integer = retrieve(tokens, (*index)++);
+  cson_object_t *new_obj = create_cson_int(*integer);
+  return new_obj;
 }
