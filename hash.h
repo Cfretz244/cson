@@ -13,17 +13,17 @@
 
 // Node struct used for chaining hash collision resolution.
 typedef struct hash_node {
-    char *key;
-    void *data;
-    struct hash_node *next;
+  char *key;
+  void *data;
+  struct hash_node *next;
 } hash_node;
 
 // Struct represents a basic hashtable.
 typedef struct hash {
-    hash_node **data;
-    void (*destruct) (void *);
-    int count;
-    int size;
+  hash_node **data;
+  void (*destruct) (void *);
+  int count;
+  int size;
 } hash;
 
 /*----- Hash Functions -----*/

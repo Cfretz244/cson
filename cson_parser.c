@@ -23,6 +23,43 @@ cson_object_t *parse_int(char *json);
 cson_object_t *cson_parse_string(char *json) {
   array *tokens = tokenize(json);
 
+  for (int i = 0; i < tokens->count; i++) {
+    char *token = retrieve(tokens, i);
+    puts(token);
+
+    switch (*token) {
+      case '{':
+        break;
+
+      case '[':
+        break;
+
+      case '"':
+        break;
+
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+        break;
+
+      case 't':
+      case 'f':
+        break;
+
+      case 'n':
+        break;
+      default:
+        break;
+    }
+  }
+
   return NULL;
 }
 
@@ -72,11 +109,11 @@ array *tokenize(char *json) {
   int length = strlen(json);
 
   for (int i = 0; i < length; i++) {
-    char c = json[i];
+    char c = json[i], *tmp;
     if (isspace(c)) continue;
 
     if (c == '"') {
-      char *tmp = malloc(sizeof(char) * 2);
+      tmp = malloc(sizeof(char) * 2);
       *tmp = c;
       *(tmp + 1) = '\0';
       push(tokens, tmp);
@@ -103,8 +140,17 @@ array *tokenize(char *json) {
       *tmp = c;
       *(tmp + 1) = '\0';
       push(tokens, tmp);
+    } else if (c >= '0' && c <= '9' || c == 't' || c == 'f' || c == 'n') {
+      int diff;
+      char start = c >= '0' && c <= '9' ? '0' : 'a', end = c >= '0' && c <= '9' ? '9' : 'z';
+      for (diff = 0; diff < length && json[i + diff] >= start && json[i + diff] <= end; diff++);
+      tmp = malloc(sizeof(char) * (diff + 2));
+      memcpy(tmp, json + i, diff);
+      *(tmp + diff + 1) = '\0';
+      i += diff - 1;
+      push(tokens, tmp);
     } else {
-      char *tmp = malloc(sizeof(char) * 2);
+      tmp = malloc(sizeof(char) * 2);
       *tmp = c;
       *(tmp + 1) = '\0';
       push(tokens, tmp);
